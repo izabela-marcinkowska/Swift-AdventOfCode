@@ -28,7 +28,9 @@ struct ContentView: View {
                 }
                 var amountInLine = wordInLine(arrayToCheck: allLetters, sequence: sequence)
                 var amountInLineBackwards = wordInLine(arrayToCheck: allLetters, sequence: sequenceBackwards)
-                print("Amount in line: \(amountInLine), amount in line backwards: \(amountInLineBackwards)")
+                var amountVertical = wordVerctical(arrayToCheck: allLetters, sequence: sequence)
+                var amountVerticalBackwards = wordVerctical(arrayToCheck: allLetters, sequence: sequenceBackwards)
+                print("Amount in line: \(amountInLine), amount in line backwards: \(amountInLineBackwards), amount vertical: \(amountVertical), amount vertical backwards: \(amountVerticalBackwards)")
                 
             }
         }
@@ -36,20 +38,48 @@ struct ContentView: View {
     
     func wordInLine(arrayToCheck: [[String]], sequence: [String]) -> Int {
         var total = 0
-        for (lineIndex, line) in allLetters.enumerated() {
+        // for every line in all letters
+        for (lineIndex, line) in arrayToCheck.enumerated() {
             print("Checking line \(lineIndex), length: \(line.count)")
+            // for every letter in the line
             for i in 0...(line.count - sequence.count) {
-                
+                // if a letter is equal to first letter in sequence
                 if line[i] == sequence[0] {
                     var matches = true
+                    // for every letter in the sequence
                     for j in 0..<sequence.count {
+                        // if next letter is not the same as the next letter in sequence
                         if line[i + j] != sequence[j] {
                             matches = false
                             break
                         }
                     }
+                    // if it is the same, add one
                     if matches {
                         print("Found \(sequence) at line \(lineIndex), position \(i)")
+                        total += 1
+                    }
+                }
+            }
+        }
+        print("total is \(total)")
+        return total
+    }
+    
+    func wordVerctical(arrayToCheck: [[String]], sequence: [String]) -> Int {
+        var total = 0
+        for lineIndex in 0...(arrayToCheck.count - sequence.count) {
+            for position in 0..<arrayToCheck[lineIndex].count {
+                if arrayToCheck[lineIndex][position] == sequence[0] {
+                    var matches = true
+                    for j in 0..<sequence.count {
+                        if arrayToCheck[lineIndex + j][position] != sequence[j] {
+                            matches = false
+                            break
+                        }
+                    }
+                    if matches {
+                        print("Vertical: Found \(sequence) at line \(lineIndex), position \(position)")
                         total += 1
                     }
                 }
