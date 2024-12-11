@@ -27,6 +27,9 @@ struct ContentView: View {
                     return letters
                 }
                 var amountInLine = wordInLine(arrayToCheck: allLetters, sequence: sequence)
+                var amountInLineBackwards = wordInLine(arrayToCheck: allLetters, sequence: sequenceBackwards)
+                print("Amount in line: \(amountInLine), amount in line backwards: \(amountInLineBackwards)")
+                
             }
         }
     }
@@ -46,7 +49,7 @@ struct ContentView: View {
                         }
                     }
                     if matches {
-                        print("Found XMAS at line \(lineIndex), position \(i)")
+                        print("Found \(sequence) at line \(lineIndex), position \(i)")
                         total += 1
                     }
                 }
@@ -55,7 +58,7 @@ struct ContentView: View {
         print("total is \(total)")
         return total
     }
-    
+        
     var body: some View {
         VStack {
             Button("click") {
