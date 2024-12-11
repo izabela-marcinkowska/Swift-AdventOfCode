@@ -16,84 +16,133 @@ struct ContentView: View {
     func getLetters() {
         print("Get the letters function started")
         if let textURL = Bundle.main.url(forResource: "day4", withExtension: "txt") {
-            print("Do we have a file?")
             if let text = try? String(contentsOf: textURL, encoding: .utf8) {
-                print("Do we have the text?")
                 let lines = text.components(separatedBy: .newlines)
-                    .filter {!$0.isEmpty}
+                    .filter { !$0.isEmpty }
                 
                 allLetters = lines.compactMap { line in
                     let letters = line.map { String($0) }
                     return letters
                 }
-                var amountInLine = wordInLine(arrayToCheck: allLetters, sequence: sequence)
-                var amountInLineBackwards = wordInLine(arrayToCheck: allLetters, sequence: sequenceBackwards)
-                var amountVertical = wordVerctical(arrayToCheck: allLetters, sequence: sequence)
-                var amountVerticalBackwards = wordVerctical(arrayToCheck: allLetters, sequence: sequenceBackwards)
-                print("Amount in line: \(amountInLine), amount in line backwards: \(amountInLineBackwards), amount vertical: \(amountVertical), amount vertical backwards: \(amountVerticalBackwards)")
                 
+                // Horizontal (forward and backward)
+                let horizontalForward = findHorizontalPatterns(in: allLetters, sequence: sequence)
+                let horizontalBackward = findHorizontalPatterns(in: allLetters, sequence: sequenceBackwards)
+                
+                // Vertical (forward and backward)
+                let verticalForward = findVerticalPatterns(in: allLetters, sequence: sequence)
+                let verticalBackward = findVerticalPatterns(in: allLetters, sequence: sequenceBackwards)
+                
+                // Diagonal (only forward XMAS, no backward SAMX)
+                let diagonalPatterns = findDiagonalPatterns(in: allLetters)
+                
+                let total = horizontalForward + horizontalBackward + verticalForward + verticalBackward + diagonalPatterns
+                print("Found patterns - Horizontal forward: \(horizontalForward), backward: \(horizontalBackward)")
+                print("Found patterns - Vertical forward: \(verticalForward), backward: \(verticalBackward)")
+                print("Found patterns - Diagonal: \(diagonalPatterns)")
+                print("Total patterns found: \(total)")
+                amount = total
             }
         }
     }
     
-    func wordInLine(arrayToCheck: [[String]], sequence: [String]) -> Int {
-        var total = 0
-        // for every line in all letters
-        for (lineIndex, line) in arrayToCheck.enumerated() {
-            print("Checking line \(lineIndex), length: \(line.count)")
-            // for every letter in the line
-            for i in 0...(line.count - sequence.count) {
-                // if a letter is equal to first letter in sequence
-                if line[i] == sequence[0] {
-                    var matches = true
-                    // for every letter in the sequence
-                    for j in 0..<sequence.count {
-                        // if next letter is not the same as the next letter in sequence
-                        if line[i + j] != sequence[j] {
-                            matches = false
-                            break
-                        }
-                    }
-                    // if it is the same, add one
-                    if matches {
-                        print("Found \(sequence) at line \(lineIndex), position \(i)")
-                        total += 1
-                    }
-                }
-            }
-        }
-        print("total is \(total)")
-        return total
-    }
-    
-    func wordVerctical(arrayToCheck: [[String]], sequence: [String]) -> Int {
-        var total = 0
-        for lineIndex in 0...(arrayToCheck.count - sequence.count) {
-            for position in 0..<arrayToCheck[lineIndex].count {
-                if arrayToCheck[lineIndex][position] == sequence[0] {
-                    var matches = true
-                    for j in 0..<sequence.count {
-                        if arrayToCheck[lineIndex + j][position] != sequence[j] {
-                            matches = false
-                            break
-                        }
-                    }
-                    if matches {
-                        print("Vertical: Found \(sequence) at line \(lineIndex), position \(position)")
-                        total += 1
-                    }
-                }
-            }
-        }
-        print("total is \(total)")
-        return total
-    }
+    func findHorizontalPatterns(in grid: [[String]], sequence: [String]) -> Int {
+        var count = 0
         
+        for row in 0..<grid.count {
+            for col in 0...(grid[row].count - sequence.count) {
+                var matches = true
+                for i in 0..<sequence.count {
+                    if grid[row][col + i] != sequence[i] {
+                        matches = false
+                        break
+                    }
+                }
+                if matches {
+                    count += 1
+                }
+            }
+        }
+        
+        return count
+    }
+    
+    func findVerticalPatterns(in grid: [[String]], sequence: [String]) -> Int {
+        var count = 0
+        
+        for col in 0..<grid[0].count {
+            for row in 0...(grid.count - sequence.count) {
+                var matches = true
+                for i in 0..<sequence.count {
+                    if grid[row + i][col] != sequence[i] {
+                        matches = false
+                        break
+                    }
+                }
+                if matches {
+                    count += 1
+                }
+            }
+        }
+        
+        return count
+    }
+    
+    func findDiagonalPatterns(in grid: [[String]]) -> Int {
+        var count = 0
+        
+        // Check all four diagonal directions for XMAS (not SAMX)
+        for row in 0..<grid.count {
+            for col in 0..<grid[row].count {
+                if grid[row][col] == "X" {
+                    // Down-right
+                    if row <= grid.count - 4 && col <= grid[row].count - 4 {
+                        if grid[row + 1][col + 1] == "M" &&
+                           grid[row + 2][col + 2] == "A" &&
+                           grid[row + 3][col + 3] == "S" {
+                            count += 1
+                        }
+                    }
+                    
+                    // Down-left
+                    if row <= grid.count - 4 && col >= 3 {
+                        if grid[row + 1][col - 1] == "M" &&
+                           grid[row + 2][col - 2] == "A" &&
+                           grid[row + 3][col - 3] == "S" {
+                            count += 1
+                        }
+                    }
+                    
+                    // Up-right
+                    if row >= 3 && col <= grid[row].count - 4 {
+                        if grid[row - 1][col + 1] == "M" &&
+                           grid[row - 2][col + 2] == "A" &&
+                           grid[row - 3][col + 3] == "S" {
+                            count += 1
+                        }
+                    }
+                    
+                    // Up-left
+                    if row >= 3 && col >= 3 {
+                        if grid[row - 1][col - 1] == "M" &&
+                           grid[row - 2][col - 2] == "A" &&
+                           grid[row - 3][col - 3] == "S" {
+                            count += 1
+                        }
+                    }
+                }
+            }
+        }
+        
+        return count
+    }
+    
     var body: some View {
         VStack {
-            Button("click") {
+            Button("Find XMAS Patterns") {
                 getLetters()
             }
+            Text("Found \(amount) patterns")
         }
         .padding()
     }
